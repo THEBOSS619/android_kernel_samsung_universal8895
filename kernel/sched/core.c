@@ -3503,7 +3503,6 @@ static void __sched notrace __schedule(bool preempt)
 
 		trace_sched_switch(preempt, prev, next);
 		rq = context_switch(rq, prev, next, &rf); /* unlocks the rq */
-		cpu = cpu_of(rq);
 	} else {
 		rq->clock_skip_update = 0;
 		rq_unpin_lock(rq, &rf);
