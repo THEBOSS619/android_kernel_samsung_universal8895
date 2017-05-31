@@ -1,6 +1,7 @@
 #ifndef __ASM_TOPOLOGY_H
 #define __ASM_TOPOLOGY_H
 
+
 #include <linux/cpumask.h>
 
 struct cpu_topology {
@@ -32,8 +33,7 @@ extern unsigned long cpufreq_scale_max_freq_capacity(struct sched_domain *sd, in
 #define arch_scale_min_freq_capacity cpufreq_scale_min_freq_capacity
 extern unsigned long cpufreq_scale_min_freq_capacity(struct sched_domain *sd, int cpu);
 #endif
-#define arch_scale_cpu_capacity scale_cpu_capacity
-extern unsigned long scale_cpu_capacity(struct sched_domain *sd, int cpu);
+#define arch_scale_cpu_capacity topology_get_cpu_scale
 
 #include <asm-generic/topology.h>
 
