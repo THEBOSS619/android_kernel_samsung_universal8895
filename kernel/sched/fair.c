@@ -7120,7 +7120,7 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
 	return select_idle_sibling_cstate_aware(p, prev, target);
 }
 
-static int start_cpu(bool boosted)
+int start_cpu(bool boosted)
 {
 	struct root_domain *rd = cpu_rq(smp_processor_id())->rd;
 
@@ -7537,8 +7537,13 @@ static int select_energy_cpu_brute(struct task_struct *p, int prev_cpu,
 	sync_entity_load_avg(&p->se);
 
 	/* Find a cpu with sufficient capacity */
-	next_cpu = find_best_target(p, &backup_cpu, boosted || sync_boost,
-				    prefer_idle);
+	if (sched_feat(EXYNOS_HMP))
+		next_cpu = exynos_select_cpu(p, &backup_cpu, boosted || sync_boost,
+						prefer_idle);
+	else
+		next_cpu = find_best_target(p, &backup_cpu, boosted || sync_boost,
+						prefer_idle);
+
 	if (next_cpu == -1) {
 		target_cpu = prev_cpu;
 		goto out;
@@ -7648,14 +7653,6 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 		want_affine = !wake_wide(p, sibling_count_hint) &&
 			      !_wake_cap &&
 			      cpumask_test_cpu(cpu, &p->cpus_allowed);
-	}
-
-	if (sched_feat(EXYNOS_HMP)) {
-		int selected_cpu;
-
-		selected_cpu = exynos_select_cpu(p, prev_cpu, sync, sd_flag);
-		if (selected_cpu >= 0)
-			return selected_cpu;
 	}
 
 	rcu_read_lock();
