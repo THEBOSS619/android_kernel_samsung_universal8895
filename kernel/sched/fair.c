@@ -5174,14 +5174,20 @@ static void clear_sd_overutilized(struct sched_domain *sd)
 static inline void update_overutilized_status(struct rq *rq)
 {
 	struct sched_domain *sd;
+	bool overutilized = false;
 
 	rcu_read_lock();
 	sd = rcu_dereference(rq->sd);
-	if (cpu_overutilized(rq->cpu)) {
-		if (sd && (sd->flags & SD_LOAD_BALANCE))
+	if (sd && !sd_overutilized(sd)) {
+		if (sched_feat(EXYNOS_HMP))
+			overutilized = lbt_overutilized(rq->cpu, sd->level);
+		else
+			overutilized = cpu_overutilized(rq->cpu);
+
+		if (overutilized)
 			set_sd_overutilized(sd);
-		else if (sd && sd->parent)
-			set_sd_overutilized(sd->parent);
+	} else if (sd && sd->parent) {
+		set_sd_overutilized(sd->parent);
 	}
 	rcu_read_unlock();
 }
@@ -8996,6 +9002,8 @@ skip_unlock: __attribute__ ((unused));
 	if (!capacity)
 		capacity = 1;
 
+	update_lbt_overutil(cpu, capacity);
+
 	cpu_rq(cpu)->cpu_capacity = capacity;
 	if (!sd->child) {
 		sdg->sgc->capacity = capacity;
@@ -9290,11 +9298,20 @@ static inline void update_sg_lb_stats(struct lb_env *env,
 		if (!nr_running && idle_cpu(i))
 			sgs->idle_cpus++;
 
-		if (cpu_overutilized(i)) {
-			*overutilized = true;
+		if (sched_feat(EXYNOS_HMP)) {
+			if (lbt_overutilized(i, env->sd->level)) {
+				*overutilized = true;
 
-			if (rq->misfit_task)
-				*misfit_task = true;
+				if (rq->misfit_task)
+					*misfit_task = true;
+			}
+		} else {
+			if (cpu_overutilized(i)) {
+				*overutilized = true;
+
+				if (rq->misfit_task)
+					*misfit_task = true;
+			}
 		}
 		if (!sgs->group_misfit_task && rq->misfit_task)
 			sgs->group_misfit_task = capacity_of(i);
