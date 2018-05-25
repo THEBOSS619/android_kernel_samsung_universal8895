@@ -252,6 +252,9 @@ struct schedtune {
 	/* SchedTune util-est */
 	int util_est_en;
 
+	/* Hint to group tasks by process */
+	int band;
+
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	/*
 	 * This tracks the default boost value and is used to restore
@@ -305,6 +308,7 @@ root_schedtune = {
 	.perf_constrain_idx = 0,
 	.prefer_idle = 0,
 	.prefer_perf = 0,
+	.band = 0,
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	.boost_default = 0,
 	.sched_boost = 0,
@@ -619,6 +623,15 @@ void schedtune_cancel_attach(struct cgroup_taskset *tset)
 	 * mouted on its own hierarcy, for the time being we do not implement
 	 * a proper rollback mechanism */
 	WARN(1, "SchedTune cancel attach not implemented");
+}
+
+static void schedtune_attach(struct cgroup_taskset *tset)
+{
+	struct task_struct *task;
+	struct cgroup_subsys_state *css;
+
+	cgroup_taskset_for_each(task, css, tset)
+		sync_band(task, css_st(css)->band);
 }
 
 /*
@@ -1093,6 +1106,24 @@ util_est_en_write(struct cgroup_subsys_state *css, struct cftype *cft,
 }
 
 static u64
+band_read(struct cgroup_subsys_state *css, struct cftype *cft)
+{
+	struct schedtune *st = css_st(css);
+
+	return st->band;
+}
+
+static int
+band_write(struct cgroup_subsys_state *css, struct cftype *cft,
+	    u64 band)
+{
+	struct schedtune *st = css_st(css);
+	st->band = band;
+
+	return 0;
+}
+
+static u64
 prefer_idle_read(struct cgroup_subsys_state *css, struct cftype *cft)
 {
 	struct schedtune *st = css_st(css);
@@ -1248,6 +1279,11 @@ static struct cftype files[] = {
 		.name = "prefer_perf",
 		.read_u64 = prefer_perf_read,
 		.write_u64 = prefer_perf_write,
+	},
+	{
+		.name = "band",
+		.read_u64 = band_read,
+		.write_u64 = band_write,
 	},
 	{
 		.name = "gb_util",
@@ -1419,6 +1455,7 @@ struct cgroup_subsys schedtune_cgrp_subsys = {
 	.allow_attach   = schedtune_allow_attach,
 	.can_attach     = schedtune_can_attach,
 	.cancel_attach  = schedtune_cancel_attach,
+	.attach		= schedtune_attach,
 	.legacy_cftypes	= files,
 	.early_init	= 1,
 };
