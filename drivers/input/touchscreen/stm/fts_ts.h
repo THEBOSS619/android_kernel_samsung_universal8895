@@ -5,6 +5,11 @@
 #include <linux/input/sec_cmd.h>
 #include <linux/wakelock.h>
 
+#if defined(CONFIG_FB)
+#include <linux/notifier.h>
+#include <linux/fb.h>
+#endif
+
 #undef FTS_SUPPORT_TOUCH_KEY
 #define FTS_SUPPORT_PRESSURE_SENSOR
 #define FTS_SUPPORT_STRINGLIB
@@ -569,6 +574,10 @@ struct fts_ts_info {
 	int touchkey_threshold;
 	struct device *fac_dev_tk;
 	bool tsk_led_enabled;
+#endif
+
+#if defined(CONFIG_FB)
+	struct notifier_block fb_notif;
 #endif
 
 	int touch_count;
