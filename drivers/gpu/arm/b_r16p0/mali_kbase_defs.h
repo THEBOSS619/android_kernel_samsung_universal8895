@@ -49,7 +49,6 @@
 #include <linux/slab.h>
 #include <linux/file.h>
 #include <linux/sizes.h>
-#include <linux/kthread.h>
 
 #ifdef CONFIG_MALI_FPGA_BUS_LOGGER
 #include <linux/bus_logger.h>
@@ -604,16 +603,12 @@ struct kbase_atom_dependency_systrace {
  *                         snapshot of the age_count counter in kbase context.
  */
 struct kbase_jd_atom {
-	/* kthread work list */
 	struct work_struct work;
-	struct kthread_work event_work;
-	struct kthread_work job_done_work;
-	struct kthread_work js_work;
-
 	ktime_t start_timestamp;
 
 	struct base_jd_udata udata;
 	struct kbase_context *kctx;
+
 	struct list_head dep_head[2];
 	struct list_head dep_item[2];
 	const struct kbase_jd_atom_dependency dep[2];
@@ -838,6 +833,8 @@ static inline bool kbase_jd_katom_is_protected(const struct kbase_jd_atom *katom
  *                            Since the waitq is only set under @lock, the waiter
  *                            should also briefly obtain and drop @lock to guarantee
  *                            that the setter has completed its work on the kbase_context
+ * @job_done_wq:              Workqueue to which the per atom work item is queued
+ *                            for bottom half processing when the atom completes
  *                            execution on GPU or the input fence get signaled.
  * @tb_lock:                  Lock to serialize the write access made to @tb to
  *                            to store the register access trace messages.
@@ -859,6 +856,8 @@ struct kbase_jd_context {
 	u32 job_nr;
 
 	wait_queue_head_t zero_jobs_wait;
+
+	struct workqueue_struct *job_done_wq;
 
 	spinlock_t tb_lock;
 	u32 *tb;
@@ -1811,6 +1810,9 @@ struct kbase_sub_alloc {
  * @event_closed:         Flag set through POST_TERM ioctl, indicates that Driver
  *                        should stop posting events and also inform event handling
  *                        thread that context termination is in progress.
+ * @event_workq:          Workqueue for processing work items corresponding to atoms
+ *                        that do not return an event to Userspace or have to perform
+ *                        a replay job
  * @event_count:          Count of the posted events to be consumed by Userspace.
  * @event_coalesce_count: Count of the events present in @event_coalesce_list.
  * @flags:                bitmap of enums from kbase_context_flags, indicating the
@@ -2024,11 +2026,7 @@ struct kbase_context {
 	struct list_head event_coalesce_list;
 	struct mutex event_mutex;
 	atomic_t event_closed;
-
-	/* workers */
-	struct kthread_worker worker;
-	struct task_struct *worker_thread;
-	struct kthread_work jit_work;
+	struct workqueue_struct *event_workq;
 	atomic_t event_count;
 	int event_coalesce_count;
 
@@ -2071,6 +2069,7 @@ struct kbase_context {
 #ifdef CONFIG_MALI_DMA_FENCE
 	struct {
 		struct list_head waiting_resource;
+		struct workqueue_struct *wq;
 	} dma_fence;
 #endif /* CONFIG_MALI_DMA_FENCE */
 
@@ -2146,6 +2145,7 @@ struct kbase_context {
 	struct list_head jit_pool_head;
 	struct list_head jit_destroy_head;
 	struct mutex jit_evict_lock;
+	struct work_struct jit_work;
 
 	struct list_head jit_atoms_head;
 	struct list_head jit_pending_alloc;
