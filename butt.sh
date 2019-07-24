@@ -23,6 +23,7 @@ DT_IMG=${KERNEL_ZIP}/dtb*.img
 OUTPUT_PATH=${KERNEL_PATH}/output
 
 export CROSS_COMPILE=$(pwd)/linaro-6.2-aarch64/bin/aarch64-linux-gnu-;
+export CROSS_COMPILE_ARM32=$(pwd)/linaro-6.2/bin/arm-eabi-;
 
 JOBS=`grep processor /proc/cpuinfo | wc -l`
 
@@ -138,6 +139,7 @@ function main() {
 	if [ "${USE_CCACHE}" == "1" ]; then
 		CCACHE_PATH=/usr/local/bin/ccache;
 		export CROSS_COMPILE="${CCACHE_PATH} ${CROSS_COMPILE}";
+		export CROSS_COMPILE_ARM32="${CCACHE_PATH} ${CROSS_COMPILE_ARM32}";
 		export JOBS=8;
 		echo -e "$red";
 		echo -e "You have enabled ccache through *export USE_CCACHE=1*, now using ccache...$nocol";
