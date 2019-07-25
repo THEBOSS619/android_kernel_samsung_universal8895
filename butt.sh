@@ -22,7 +22,7 @@ KERNEL_IMAGE=${KERNEL_ZIP}/Image
 DT_IMG=${KERNEL_ZIP}/dtb*.img
 OUTPUT_PATH=${KERNEL_PATH}/output
 
-export CROSS_COMPILE=$(pwd)/linaro-6.2-aarch64/bin/aarch64-linux-gnu-;
+export CROSS_COMPILE=$(pwd)/linaro-exynos/bin/aarch64-linux-gnu-;
 export CROSS_COMPILE_ARM32=$(pwd)/linaro-6.2/bin/arm-eabi-;
 
 JOBS=`grep processor /proc/cpuinfo | wc -l`
