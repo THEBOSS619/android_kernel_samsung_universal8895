@@ -78,6 +78,8 @@ on property:sys.boot_completed=1
     ## Disable this service on custom kernels as it leads to an increased battery drain.
     stop secure_storage
 
+    setprop persist.sys.ui.hw true
+
     exec u:r:init:s0 -- /rz/rz_kernel.sh
 
 on shutdown
