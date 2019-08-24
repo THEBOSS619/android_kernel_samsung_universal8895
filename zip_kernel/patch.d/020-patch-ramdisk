@@ -19,6 +19,14 @@ insert_line() {
   fi;
 }
 
+# remove_line <file> <line match string>
+remove_line() {
+  if grep -q "$2" $1; then
+    local line=$(grep -n "$2" $1 | head -n1 | cut -d: -f1);
+    sed -i "${line}d" $1;
+  fi;
+}
+
 cd "$ramdisk_patch" && [ "$(ls)" ] || exit 0
 
 # fix permissions of patch files
@@ -36,6 +44,9 @@ find -type f \( \
 
 print "Copying new files to the ramdisk..."
 cp -rd ./. "$ramdisk/"
+
+print "Removing hades leftovers..."
+rm -rf $ramdisk/hades
 
 insert_line $ramdisk/init.rc "init.services.rc" after "import /init.environ.rc" "import /init.services.rc\n";
 
