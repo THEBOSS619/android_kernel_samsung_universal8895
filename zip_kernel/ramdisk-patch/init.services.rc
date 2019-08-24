@@ -12,11 +12,41 @@ service sysinit_cm /rz/bin/sysinit_cm
     oneshot
     seclabel u:r:shell:s0
 
-on charger
-
-on early-init
-
 on init
+    # UFS readahead
+    chmod 660 /sys/block/sda/queue/read_ahead_kb
+    write /sys/block/sda/queue/read_ahead_kb 2048
+
+    # SD card readahead
+    chmod 660 /sys/block/mmcblk0/queue/read_ahead_kb
+
+    # CPUSET(9810)
+    chown system system /dev/cpuset/top-app/cpus
+    chown system system /dev/cpuset/foreground/cpus
+    chown system system /dev/cpuset/background/cpus
+    chown system system /dev/cpuset/system-background/cpus
+    chown system system /dev/cpuset/restricted/cpus
+    chown system system /dev/cpuset/cpus
+    chown radio system /dev/stune/top-app/schedtune.prefer_idle
+    chown radio system /dev/stune/top-app/schedtune.boost
+    chown radio system /dev/stune/foreground/schedtune.prefer_idle
+    chown radio system /dev/stune/foreground/schedtune.boost
+    chown radio system /dev/stune/background/schedtune.prefer_idle
+    chown radio system /dev/stune/background/schedtune.boost
+
+    chmod 664 /dev/cpuset/top-app/cpus
+    chmod 664 /dev/cpuset/foreground/cpus
+    chmod 664 /dev/cpuset/background/cpus
+    chmod 664 /dev/cpuset/system-background/cpus
+    chmod 664 /dev/cpuset/restricted/cpus
+    chmod 664 /dev/cpuset/cpus
+    chmod 0664 /dev/stune/top-app/schedtune.prefer_idle
+    chmod 0664 /dev/stune/top-app/schedtune.boost
+    chmod 0664 /dev/stune/foreground/schedtune.prefer_idle
+    chmod 0664 /dev/stune/foreground/schedtune.boost
+    chmod 0664 /dev/stune/background/schedtune.prefer_idle
+    chmod 0664 /dev/stune/background/schedtune.boost
+
     ## configure governor settings for little cluster
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "pwrutilx"
     write /sys/devices/system/cpu/cpufreq/policy0/pwrutilx/up_rate_limit_us 500
@@ -27,28 +57,25 @@ on init
     write /sys/devices/system/cpu/cpufreq/policy4/pwrutilx/up_rate_limit_us 500
     write /sys/devices/system/cpu/cpufreq/policy4/pwrutilx/down_rate_limit_us 20000
 
-on post-fs-data
-    # Bind mount needed files
-    mount auto /data/rz_system/lib/libsecure_storage.so /system/lib/libsecure_storage.so bind
-    mount auto /data/rz_system/lib64/libsecure_storage.so /system/lib64/libsecure_storage.so bind
-    mount auto /data/rz_system/vendor/firmware/.clminfo /system/vendor/firmware/.clminfo bind
-    mount auto /data/rz_system/vendor/firmware/fimc_is_lib.bin /system/vendor/firmware/fimc_is_lib.bin bind
-    mount auto /data/rz_system/vendor/firmware/fimc_is_rta_2l2_3h1.bin /system/vendor/firmware/fimc_is_rta_2l2_3h1.bin bind
-    mount auto /data/rz_system/vendor/firmware/fimc_is_rta_2l2_imx320.bin /system/vendor/firmware/fimc_is_rta_2l2_imx320.bin bind
-    mount auto /data/rz_system/vendor/firmware/fimc_is_rta_imx333_3h1.bin /system/vendor/firmware/fimc_is_rta_imx333_3h1.bin bind
-    mount auto /data/rz_system/vendor/firmware/fimc_is_rta_imx333_imx320.bin /system/vendor/firmware/fimc_is_rta_imx333_imx320.bin bind
-
-on fs
-
-on late-fs
-
 on boot
     chown root root /sys/fs/selinux/enforce
     chmod 0644 /sys/fs/selinux/enforce
     write /sys/fs/selinux/enforce 0
-    start sysinit_cm
 
 on property:sys.boot_completed=1
+    write /dev/cpuset/top-app/cpus 0-7
+    write /dev/cpuset/foreground/cpus 0-3,6-7
+    write /dev/cpuset/background/cpus 0-1
+    write /dev/cpuset/system-background/cpus 0-3
+
+    write /dev/stune/schedtune.boost 0
+    write /dev/stune/top-app/schedtune.boost 5
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+    write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/background/schedtune.boost -10
+
+    start sysinit_cm
+
     # Disable DVFS
     chown system system /sys/power/disable_dvfs
     write /sys/power/disable_dvfs 1
@@ -75,11 +102,4 @@ on property:sys.boot_completed=1
     write /sys/devices/system/cpu/cpufreq/policy4/schedutil/up_rate_limit_us 500
     write /sys/devices/system/cpu/cpufreq/policy4/schedutil/down_rate_limit_us 20000
 
-    ## Disable this service on custom kernels as it leads to an increased battery drain.
-    stop secure_storage
-
     setprop persist.sys.ui.hw true
-
-    exec u:r:init:s0 -- /rz/rz_kernel.sh
-
-on shutdown
