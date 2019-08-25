@@ -12,21 +12,6 @@ service sysinit_cm /rz/bin/sysinit_cm
     oneshot
     seclabel u:r:shell:s0
 
-on charger
-
-on early-init
-
-on init
-    ## configure governor settings for little cluster
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "pwrutilx"
-    write /sys/devices/system/cpu/cpufreq/policy0/pwrutilx/up_rate_limit_us 500
-    write /sys/devices/system/cpu/cpufreq/policy0/pwrutilx/down_rate_limit_us 20000
-
-    ## configure governor settings for big cluster
-    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "pwrutilx"
-    write /sys/devices/system/cpu/cpufreq/policy4/pwrutilx/up_rate_limit_us 500
-    write /sys/devices/system/cpu/cpufreq/policy4/pwrutilx/down_rate_limit_us 20000
-
 on post-fs-data
     # Bind mount needed files
     mount auto /data/rz_system/lib/libsecure_storage.so /system/lib/libsecure_storage.so bind
@@ -37,10 +22,6 @@ on post-fs-data
     mount auto /data/rz_system/vendor/firmware/fimc_is_rta_2l2_imx320.bin /system/vendor/firmware/fimc_is_rta_2l2_imx320.bin bind
     mount auto /data/rz_system/vendor/firmware/fimc_is_rta_imx333_3h1.bin /system/vendor/firmware/fimc_is_rta_imx333_3h1.bin bind
     mount auto /data/rz_system/vendor/firmware/fimc_is_rta_imx333_imx320.bin /system/vendor/firmware/fimc_is_rta_imx333_imx320.bin bind
-
-on fs
-
-on late-fs
 
 on boot
     chown root root /sys/fs/selinux/enforce
@@ -65,21 +46,9 @@ on property:sys.boot_completed=1
     write /proc/sys/vm/dirty_expire_centisecs 2000
     write /proc/sys/vm/dirty_writeback_centisecs 5000
 
-    ## configure governor settings for little cluster
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
-    write /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us 500
-    write /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us 20000
-
-    ## configure governor settings for big cluster
-    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "schedutil"
-    write /sys/devices/system/cpu/cpufreq/policy4/schedutil/up_rate_limit_us 500
-    write /sys/devices/system/cpu/cpufreq/policy4/schedutil/down_rate_limit_us 20000
-
     ## Disable this service on custom kernels as it leads to an increased battery drain.
     stop secure_storage
 
     setprop persist.sys.ui.hw true
 
     exec u:r:init:s0 -- /rz/rz_kernel.sh
-
-on shutdown
