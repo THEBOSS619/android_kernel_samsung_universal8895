@@ -13,6 +13,45 @@ service sysinit_cm /rz/bin/sysinit_cm
     seclabel u:r:shell:s0
 
 on init
+    # EAS stune boosting interfaces
+    chown system system /dev/stune/top-app/schedtune.boost
+    chown system system /dev/stune/top-app/schedtune.prefer_idle
+    chown system system /dev/stune/top-app/schedtune.prefer_perf
+    chown system system /dev/stune/top-app/cgroup.procs
+
+    chown system system /dev/stune/foreground/schedtune.boost
+    chown system system /dev/stune/foreground/schedtune.prefer_idle
+    chown system system /dev/stune/foreground/schedtune.prefer_perf
+    chown system system /dev/stune/foreground/cgroup.procs
+
+    chown system system /dev/stune/background/schedtune.boost
+    chown system system /dev/stune/background/schedtune.prefer_idle
+    chown system system /dev/stune/background/schedtune.prefer_perf
+    chown system system /dev/stune/background/cgroup.procs
+
+    chown system system /dev/stune/schedtune.boost
+    chown system system /dev/stune/schedtune.prefer_idle
+    chown system system /dev/stune/schedtune.prefer_perf
+    chown system system /dev/stune/cgroup.procs
+
+    write /dev/stune/top-app/schedtune.boost 5
+    write /dev/stune/top-app/schedtune.prefer_idle 1
+    write /dev/stune/top-app/schedtune.prefer_perf 0
+    write /dev/stune/top-app/schedtune.util_est_en 1
+    write /dev/stune/top-app/schedtune.ontime_en 1
+
+    write /dev/stune/foreground/schedtune.boost 0
+    write /dev/stune/foreground/schedtune.prefer_idle 0
+    write /dev/stune/foreground/schedtune.prefer_perf 0
+    write /dev/stune/foreground/schedtune.util_est_en 1
+    write /dev/stune/foreground/schedtune.ontime_en 1
+
+    write /dev/stune/background/schedtune.boost 0
+    write /dev/stune/background/schedtune.prefer_idle 0
+    write /dev/stune/background/schedtune.prefer_perf 0
+
+    write /dev/stune/schedtune.boost 0
+
     # UFS readahead
     chmod 660 /sys/block/sda/queue/read_ahead_kb
     write /sys/block/sda/queue/read_ahead_kb 2048
@@ -27,12 +66,40 @@ on init
     chown system system /dev/cpuset/system-background/cpus
     chown system system /dev/cpuset/restricted/cpus
     chown system system /dev/cpuset/cpus
+    chown radio system /dev/stune/top-app/schedtune.prefer_perf
     chown radio system /dev/stune/top-app/schedtune.prefer_idle
+    chown radio system /dev/stune/top-app/schedtune.band
     chown radio system /dev/stune/top-app/schedtune.boost
+    chown radio system /dev/stune/top-app/schedtune.util_est_en
+    chown radio system /dev/stune/top-app/schedtune.ontime_en
+    chown radio system /dev/stune/foreground/schedtune.prefer_perf
     chown radio system /dev/stune/foreground/schedtune.prefer_idle
+    chown radio system /dev/stune/foreground/schedtune.band;
     chown radio system /dev/stune/foreground/schedtune.boost
+    chown radio system /dev/stune/foreground/schedtune.util_est_en
+    chown radio system /dev/stune/foreground/schedtune.ontime_en
+    chown radio system /dev/stune/background/schedtune.prefer_perf
     chown radio system /dev/stune/background/schedtune.prefer_idle
+    chown radio system /dev/stune/background/schedtune.band
     chown radio system /dev/stune/background/schedtune.boost
+    chown radio system /dev/stune/background/schedtune.util_est_en
+    chown radio system /dev/stune/background/schedtune.ontime_en
+    chown radio system /sys/kernel/ems/ontime/coregroup0/lower_boundary
+    chown radio system /sys/kernel/ems/ontime/coregroup0/upper_boundary
+    chown radio system /sys/kernel/ems/ontime/coregroup0/coverage_ratio
+    chown radio system /sys/kernel/ems/ontime/coregroup1/lower_boundary
+    chown radio system /sys/kernel/ems/ontime/coregroup1/upper_boundary
+    chown radio system /sys/kernel/ems/ontime/coregroup1/coverage_ratio
+    chown radio system /sys/kernel/ems/lbt/overutil_ratio_level0
+    chown radio system /sys/kernel/ems/lbt/overutil_ratio_level1
+    chown radio system /sys/devices/system/cpu/cpufreq/policy0/schedutil/freqvar_boost
+    chown radio system /sys/devices/system/cpu/cpufreq/policy0/schedutil/freqvar_up_rate_limit
+    chown radio system /sys/devices/system/cpu/cpufreq/policy0/schedutil/freqvar_down_rate_limit
+    chown radio system /sys/devices/system/cpu/cpufreq/policy0/schedutil/freqvar_upscale_ratio
+    chown radio system /sys/devices/system/cpu/cpufreq/policy4/schedutil/freqvar_boost
+    chown radio system /sys/devices/system/cpu/cpufreq/policy4/schedutil/freqvar_up_rate_limit
+    chown radio system /sys/devices/system/cpu/cpufreq/policy4/schedutil/freqvar_down_rate_limit
+    chown radio system /sys/devices/system/cpu/cpufreq/policy4/schedutil/freqvar_upscale_ratio
 
     chmod 664 /dev/cpuset/top-app/cpus
     chmod 664 /dev/cpuset/foreground/cpus
@@ -40,22 +107,40 @@ on init
     chmod 664 /dev/cpuset/system-background/cpus
     chmod 664 /dev/cpuset/restricted/cpus
     chmod 664 /dev/cpuset/cpus
+    chmod 0664 /dev/stune/top-app/schedtune.prefer_perf
     chmod 0664 /dev/stune/top-app/schedtune.prefer_idle
+    chmod 0664 /dev/stune/top-app/schedtune.band
     chmod 0664 /dev/stune/top-app/schedtune.boost
+    chmod 0664 /dev/stune/top-app/schedtune.util_est_en
+    chmod 0664 /dev/stune/top-app/schedtune.ontime_en
+    chmod 0664 /dev/stune/foreground/schedtune.prefer_perf
     chmod 0664 /dev/stune/foreground/schedtune.prefer_idle
+    chmod 0664 /dev/stune/foreground/schedtune.band;
     chmod 0664 /dev/stune/foreground/schedtune.boost
+    chmod 0664 /dev/stune/foreground/schedtune.util_est_en
+    chmod 0664 /dev/stune/foreground/schedtune.ontime_en
+    chmod 0664 /dev/stune/background/schedtune.prefer_perf
     chmod 0664 /dev/stune/background/schedtune.prefer_idle
+    chmod 0664 /dev/stune/background/schedtune.band
     chmod 0664 /dev/stune/background/schedtune.boost
-
-    ## configure governor settings for little cluster
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "pwrutilx"
-    write /sys/devices/system/cpu/cpufreq/policy0/pwrutilx/up_rate_limit_us 500
-    write /sys/devices/system/cpu/cpufreq/policy0/pwrutilx/down_rate_limit_us 20000
-
-    ## configure governor settings for big cluster
-    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "pwrutilx"
-    write /sys/devices/system/cpu/cpufreq/policy4/pwrutilx/up_rate_limit_us 500
-    write /sys/devices/system/cpu/cpufreq/policy4/pwrutilx/down_rate_limit_us 20000
+    chmod 0664 /dev/stune/background/schedtune.util_est_en
+    chmod 0664 /dev/stune/background/schedtune.ontime_en
+    chmod 0664 /sys/kernel/ems/ontime/coregroup0/lower_boundary
+    chmod 0664 /sys/kernel/ems/ontime/coregroup0/upper_boundary
+    chmod 0664 /sys/kernel/ems/ontime/coregroup0/coverage_ratio
+    chmod 0664 /sys/kernel/ems/ontime/coregroup1/lower_boundary
+    chmod 0664 /sys/kernel/ems/ontime/coregroup1/upper_boundary
+    chmod 0664 /sys/kernel/ems/ontime/coregroup1/coverage_ratio
+    chmod 0664 /sys/kernel/ems/lbt/overutil_ratio_level0
+    chmod 0664 /sys/kernel/ems/lbt/overutil_ratio_level1
+    chmod 0664 /sys/devices/system/cpu/cpufreq/policy0/schedutil/freqvar_boost
+    chmod 0664 /sys/devices/system/cpu/cpufreq/policy0/schedutil/freqvar_up_rate_limit
+    chmod 0664 /sys/devices/system/cpu/cpufreq/policy0/schedutil/freqvar_down_rate_limit
+    chmod 0664 /sys/devices/system/cpu/cpufreq/policy0/schedutil/freqvar_upscale_ratio
+    chmod 0664 /sys/devices/system/cpu/cpufreq/policy4/schedutil/freqvar_boost
+    chmod 0664 /sys/devices/system/cpu/cpufreq/policy4/schedutil/freqvar_up_rate_limit
+    chmod 0664 /sys/devices/system/cpu/cpufreq/policy4/schedutil/freqvar_down_rate_limit
+    chmod 0664 /sys/devices/system/cpu/cpufreq/policy4/schedutil/freqvar_upscale_ratio
 
 on boot
     chown root root /sys/fs/selinux/enforce
@@ -67,12 +152,6 @@ on property:sys.boot_completed=1
     write /dev/cpuset/foreground/cpus 0-3,6-7
     write /dev/cpuset/background/cpus 0-1
     write /dev/cpuset/system-background/cpus 0-3
-
-    write /dev/stune/schedtune.boost 0
-    write /dev/stune/top-app/schedtune.boost 5
-    write /dev/stune/top-app/schedtune.prefer_idle 1
-    write /dev/stune/foreground/schedtune.prefer_idle 1
-    write /dev/stune/background/schedtune.boost -10
 
     start sysinit_cm
 
