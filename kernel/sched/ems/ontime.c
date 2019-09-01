@@ -215,7 +215,7 @@ ontime_select_target_cpu(struct task_struct *p, struct cpumask *fit_cpus)
 					break;
 				}
 
-				if (idle->exit_latency < min_exit_latency) {
+				if (idle->exit_latency <= min_exit_latency) {
 					min_exit_latency = idle->exit_latency;
 					best_cpu = i;
 				}
