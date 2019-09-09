@@ -1,12 +1,11 @@
-NAME ?= RZ_kernel
+NAME ?= RZ
 
 DATE := $(shell date +'%Y%m%d-%H%M')
 
-ZIP := $(NAME)-$(DEVICE)-$(DATE).zip
+ZIP := $(NAME)-LineageOS-$(DEVICE)-$(DATE).zip
 
 EXCLUDE := \
 	Makefile README.md *.git* "$(NAME)-"*.zip* \
-	rz_system/vendor/firmware_**\* \
 
 all: $(ZIP)
 
@@ -20,5 +19,4 @@ $(ZIP):
 
 clean:
 	@rm -vf "$(NAME)-"*.zip*
-	@rm -rf rz_system/vendor/firmware
 	@echo "Done."

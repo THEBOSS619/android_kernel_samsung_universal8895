@@ -66,12 +66,6 @@ function make_zip() {
 	echo -e "$red";
 	echo -e "Making flashable zip...$nocol";
 
-	if [ "$DEVICE" == "greatlte" ]; then
-		cp -rf ${KERNEL_ZIP}/rz_system/vendor/firmware_n8/ ${KERNEL_ZIP}/rz_system/vendor/firmware;
-	elif [ "$DEVICE" == "dreamlte-dream2lte" ]; then
-		cp -r ${KERNEL_ZIP}/rz_system/vendor/firmware_s8/ ${KERNEL_ZIP}/rz_system/vendor/firmware;
-	fi;
-
 	cd ${KERNEL_ZIP};
 	make -j${JOBS};
 }
@@ -89,7 +83,6 @@ function clean() {
 
 	rm_if_exist ${OUTPUT_PATH};
 	rm_if_exist ${DT_IMG};
-	rm_if_exist ${KERNEL_ZIP}/rz_system/vendor/firmware;
 
 	cd ${KERNEL_ZIP};
 	make -j${JOBS} clean;
