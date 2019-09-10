@@ -305,7 +305,7 @@
 					cpus =	"0-3",
 						"4-7";
 					ratio =	<30>,
-						<40>;
+						<60>;
 				};
 				overutil-level1 {
 					cpus =	"0-7";
