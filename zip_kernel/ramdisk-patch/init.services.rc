@@ -46,6 +46,10 @@ on property:sys.boot_completed=1
     write /proc/sys/vm/dirty_expire_centisecs 2000
     write /proc/sys/vm/dirty_writeback_centisecs 5000
 
+    # schedutil/freqvar
+    write /sys/devices/system/cpu/cpufreq/policy0/schedutil/freqvar_upscale_ratio "80 1053000 100"
+    write /sys/devices/system/cpu/cpufreq/policy4/schedutil/freqvar_upscale_ratio "80"
+
     ## Disable this service on custom kernels as it leads to an increased battery drain.
     stop secure_storage
 
