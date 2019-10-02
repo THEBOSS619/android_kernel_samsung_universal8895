@@ -76,6 +76,18 @@ function make_zip() {
 	make -j${JOBS};
 }
 
+function make_savedefconfig() {
+	echo -e "$red";
+	echo -e "Saving new defconfig...$nocol";
+
+	make O=output -j${JOBS} ${DEFCONFIG};
+	make O=output -j${JOBS} savedefconfig;
+	mv -f ${OUTPUT_PATH}/defconfig ${KERNEL_PATH}/arch/$ARCH/configs/$DEFCONFIG;
+
+	echo -e "$yellow";
+	echo -e "Done! $nocol";
+}
+
 function rm_if_exist() {
 	if [ -e $1 ]; then
 		rm -rf $1;
@@ -110,6 +122,7 @@ function menu() {
 	echo "2. Build kernel";
 	echo "3. Build kernel then make flashable ZIP";
 	echo "4. Make flashable ZIP package";
+	echo "5. Save new defconfig";
 	echo "Leave empty to exit this script (it'll show invalid choice)";
 }
 
@@ -154,6 +167,7 @@ function main() {
 		3) build
 		   make_zip;;
 		4) make_zip;;
+		5) make_savedefconfig;;
 		*) echo
 		   echo "Invalid choice entered. Exiting..."
 		   sleep 2;
