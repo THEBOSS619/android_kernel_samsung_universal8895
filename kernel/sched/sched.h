@@ -1359,8 +1359,6 @@ extern const int rtprio_to_weight[51];
 #endif
 #define ENQUEUE_WAKEUP_NEW	0x40
 
-#define DEQUEUE_IDLE		0x80 /* The last dequeue before IDLE */
-
 #define RETRY_TASK		((void *)-1UL)
 
 struct sched_class {
