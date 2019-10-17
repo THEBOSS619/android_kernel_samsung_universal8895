@@ -3974,7 +3974,7 @@ static void decon_destroy_update_thread(struct decon_device *decon)
 
 static int decon_create_update_thread(struct decon_device *decon, char *name)
 {
-	struct sched_param param = { .sched_priority = 20 };
+	struct sched_param param = { .sched_priority = 4 };
 
 	INIT_LIST_HEAD(&decon->up.list);
 	INIT_LIST_HEAD(&decon->up.saved_list);

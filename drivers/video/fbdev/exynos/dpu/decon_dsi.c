@@ -607,7 +607,7 @@ static int decon_vsync_thread(void *data)
 
 int decon_create_vsync_thread(struct decon_device *decon)
 {
-	struct sched_param param = { .sched_priority = 20 };
+	struct sched_param param = { .sched_priority = 4 };
 	int ret = 0;
 	char name[16];
 
@@ -1279,7 +1279,7 @@ static int decon_fsync_thread(void *data)
 
 int decon_create_fsync_thread(struct decon_device *decon)
 {
-	struct sched_param param = { .sched_priority = 20 };
+	struct sched_param param = { .sched_priority = 4 };
 	char name[16];
 
 	if (decon->dt.out_type != DECON_OUT_DSI) {
