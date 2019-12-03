@@ -5,10 +5,6 @@ while [[ $(getprop sys.boot_completed) != "1" ]]; do
 	sleep 1;
 done
 
-# Enable zswap
-echo "20" > /sys/module/zswap/parameters/max_pool_percent;
-echo "1" > /sys/module/zswap/parameters/enabled;
-
 # Set maximum swappiness
 echo 60 > /proc/sys/vm/swappiness;
 
@@ -54,4 +50,3 @@ for i in $(busybox seq 0 $(($num_cpu - 1))); do
 	mkswap /dev/block/zram$i;
 	swapon -p 05 /dev/block/zram$i;
 done;
-
