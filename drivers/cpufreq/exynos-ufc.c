@@ -18,6 +18,10 @@
 #include <linux/cpufreq.h>
 #include <linux/pm_opp.h>
 
+#if defined(CONFIG_SCHED_EMS)
+#include <linux/ems_service.h>
+#endif
+
 #include <soc/samsung/exynos-cpu_hotplug.h>
 
 #include "exynos-acme.h"
@@ -100,18 +104,20 @@ static ssize_t show_cpufreq_min_limit(struct kobject *kobj,
 		first_domain()->min_freq >> (scale * SCALE_SIZE));
 }
 
-#ifdef CONFIG_SCHED_HMP
+#ifdef CONFIG_SCHED_EMS
 static bool boosted;
 #endif
 
 static inline void control_boost(bool enable)
 {
-#ifdef CONFIG_SCHED_HMP
+#ifdef CONFIG_SCHED_EMS
 	if (boosted && !enable) {
-		set_hmp_boost(HMP_BOOSTING_DISABLE);
+		request_kernel_prefer_perf(STUNE_TOPAPP, 0);
+		request_kernel_prefer_perf(STUNE_FOREGROUND, 0);
 		boosted = false;
 	} else if (!boosted && enable) {
-		set_hmp_boost(HMP_BOOSTING_ENABLE);
+		request_kernel_prefer_perf(STUNE_TOPAPP, 1);
+		request_kernel_prefer_perf(STUNE_FOREGROUND, 1);
 		boosted = true;
 	}
 #endif
