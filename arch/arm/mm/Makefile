@@ -27,7 +27,7 @@ obj-$(CONFIG_CPU_ABRT_LV4T)	+= abort-lv4t.o
 obj-$(CONFIG_CPU_ABRT_EV5T)	+= abort-ev5t.o
 obj-$(CONFIG_CPU_ABRT_EV5TJ)	+= abort-ev5tj.o
 obj-$(CONFIG_CPU_ABRT_EV6)	+= abort-ev6.o
-obj-$(CONFIG_CPU_ABRT_EV7)	+= abort-ev7.o
+obj-$(CONFIG_CPU_V7)		+= proc-v7.o proc-v7-bugs.o
 
 AFLAGS_abort-ev6.o	:=-Wa,-march=armv6k
 AFLAGS_abort-ev7.o	:=-Wa,-march=armv7-a
