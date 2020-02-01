@@ -61,6 +61,7 @@ on init
 
     write /dev/stune/foreground/schedtune.boost 0
     write /dev/stune/foreground/schedtune.prefer_idle 1
+    write /dev/stune/foreground/schedtune.prefer_idle 0
     write /dev/stune/foreground/schedtune.prefer_perf 0
     write /dev/stune/foreground/schedtune.util_est_en 1
     write /dev/stune/foreground/schedtune.ontime_en 1
@@ -625,11 +626,12 @@ on boot
     write /dev/cpuset/top-app/mems 0
     write /dev/cpuset/foreground/cpus 0-2,4-7
     write /dev/cpuset/foreground/mems 0
-    write /dev/cpuset/background/cpus 0-1
+    write /dev/cpuset/background/cpus 0-2
     write /dev/cpuset/background/mems 0
     write /dev/cpuset/restricted/cpus 0-2
     write /dev/cpuset/restricted/mems 0
     write /dev/cpuset/system-background/cpus 0-3
+    write /dev/cpuset/system-background/cpus 0-2
     write /dev/cpuset/system-background/mems 0
 
 on fs

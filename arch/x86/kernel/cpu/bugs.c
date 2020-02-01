@@ -264,6 +264,7 @@ static int __init mds_cmdline(char *str)
 early_param("mds", mds_cmdline);
 
 #undef pr_fmt
+
 #define pr_fmt(fmt)	"TAA: " fmt
 
 /* Default mitigation for TAA-affected CPUs */
@@ -364,6 +365,7 @@ static int __init tsx_async_abort_parse_cmdline(char *str)
 early_param("tsx_async_abort", tsx_async_abort_parse_cmdline);
 
 #undef pr_fmt
+
 #define pr_fmt(fmt)     "Spectre V1 : " fmt
 
 enum spectre_v1_mitigation {

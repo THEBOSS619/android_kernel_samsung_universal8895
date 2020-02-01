@@ -278,6 +278,11 @@
 			M2_ENERGY: m2-energy {
 				capacity-mips = <663>;
 				power-coefficient = <760>;
+				power-coefficient = <465>;
+			};
+			M2_ENERGY: m2-energy {
+				capacity-mips = <413>;
+				power-coefficient = <945>;
 			};
 		};
 
@@ -287,7 +292,11 @@
 				/* little cores */
 				coregroup0 {
 					lower-boundary = <0>;
+
 					upper-boundary = <42>;
+
+					upper-boundary = <25>;
+
 					coverage-ratio = <100>;
 				};
 				/* big cores */
@@ -296,6 +305,7 @@
 					upper-boundary = <100>;
 					coverage-ratio = <75>;
 				};
+
 			};
 
 			/* Load Balance Trigger */
@@ -306,6 +316,23 @@
 						"4-7";
 					ratio =	<30>,
 						<40>;
+				};
+				overutil-level1 {
+					cpus =	"0-7";
+					ratio =	<DEFAULT_RATIO>;
+				};
+			};
+
+			};
+
+			/* Load Balance Trigger */
+			#define DEFAULT_RATIO	80
+			lbt {
+				overutil-level0 {
+					cpus =	"0-3",
+						"4-7";
+					ratio =	<30>,
+						<60>;
 				};
 				overutil-level1 {
 					cpus =	"0-7";

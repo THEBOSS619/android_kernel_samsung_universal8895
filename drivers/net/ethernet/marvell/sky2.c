@@ -4953,6 +4953,7 @@ static const struct dmi_system_id msi_blacklist[] = {
 			DMI_MATCH(DMI_BOARD_NAME, "P6X"),
 		},
 	},
+
 	{}
 };
 

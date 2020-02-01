@@ -33,6 +33,14 @@ rm -f /system/lib64/libvk*;
 rm -rf /system/priv-app/Rlc;
 rm -rf /system/priv-app/KnoxGuard;
 
+# Remove RMM lock (credits: @corsicanu)
+print "Removing RMM lock... (credits: corsicanu@XDA)";
+sed -i 's/vaultkeeper\.feature\=1/vaultkeeper\.feature\=0/' /system/build.prop;
+rm -f /system/lib/libvk*;
+rm -f /system/lib64/libvk*;
+rm -rf /system/priv-app/Rlc;
+rm -rf /system/priv-app/KnoxGuard;
+
 #### Originally written by @djb77 ####
 # Remove unwanted file from /system/app/mcRegistry
 rm -f /system/app/mcRegistry/ffffffffd0000000000000000000000a.tlbin;

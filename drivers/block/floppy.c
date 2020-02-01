@@ -3785,6 +3785,7 @@ static int compat_getdrvprm(int drive,
 	mutex_unlock(&floppy_mutex);
 
 	if (copy_to_user(arg, &v, sizeof(struct compat_floppy_drive_params)))
+	if (copy_from_user(arg, &v, sizeof(struct compat_floppy_drive_params)))
 		return -EFAULT;
 	return 0;
 }
@@ -3821,6 +3822,7 @@ static int compat_getdrvstat(int drive, bool poll,
 	mutex_unlock(&floppy_mutex);
 
 	if (copy_to_user(arg, &v, sizeof(struct compat_floppy_drive_struct)))
+	if (copy_from_user(arg, &v, sizeof(struct compat_floppy_drive_struct)))
 		return -EFAULT;
 	return 0;
 Eintr:
