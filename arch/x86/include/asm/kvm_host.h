@@ -216,6 +216,7 @@ union kvm_mmu_page_role {
 struct kvm_mmu_page {
 	struct list_head link;
 	struct hlist_node hash_link;
+	struct list_head lpage_disallowed_link;
 
 	/*
 	 * The following two entries are used to key the shadow page in the
@@ -228,6 +229,7 @@ struct kvm_mmu_page {
 	/* hold the gfn of each spte inside spt */
 	gfn_t *gfns;
 	bool unsync;
+	bool lpage_disallowed; /* Can't be replaced by an equiv large page */
 	int root_count;          /* Currently serving as active root */
 	unsigned int unsync_children;
 	unsigned long parent_ptes;	/* Reverse mapping for parent_pte */
@@ -635,6 +637,7 @@ struct kvm_arch {
 	 */
 	struct list_head active_mmu_pages;
 	struct list_head zapped_obsolete_pages;
+	struct list_head lpage_disallowed_mmu_pages;
 
 	struct list_head assigned_dev_head;
 	struct iommu_domain *iommu_domain;
@@ -695,7 +698,11 @@ struct kvm_arch {
 
 	bool irqchip_split;
 	u8 nr_reserved_ioapic_pins;
-};
+	bool x2apic_format;
+	bool x2apic_broadcast_quirk_disabled;
+
+	struct task_struct *nx_lpage_recovery_thread;
+};	};
 
 struct kvm_vm_stat {
 	u32 mmu_shadow_zapped;
@@ -707,7 +714,8 @@ struct kvm_vm_stat {
 	u32 mmu_cache_miss;
 	u32 mmu_unsync;
 	u32 remote_tlb_flush;
-	u32 lpages;
+	ulong lpages;
+	ulong nx_lpage_splits;
 };
 
 struct kvm_vcpu_stat {
