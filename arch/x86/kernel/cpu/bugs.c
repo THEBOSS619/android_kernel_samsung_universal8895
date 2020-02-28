@@ -1232,6 +1232,9 @@ void x86_spec_ctrl_setup_ap(void)
 		x86_amd_ssb_disable();
 }
 
+bool itlb_multihit_kvm_mitigation;
+EXPORT_SYMBOL_GPL(itlb_multihit_kvm_mitigation);
+
 #undef pr_fmt
 #define pr_fmt(fmt)	"L1TF: " fmt
 
@@ -1304,6 +1307,23 @@ static void __init l1tf_select_mitigation(void)
 #define pr_fmt(fmt) fmt
 
 #ifdef CONFIG_SYSFS
+
+static ssize_t l1tf_show_state(char *buf)
+{
+	if (l1tf_vmx_mitigation == VMENTER_L1D_FLUSH_AUTO)
+		return sprintf(buf, "%s\n", L1TF_DEFAULT_MSG);
+
+	if (l1tf_vmx_mitigation == VMENTER_L1D_FLUSH_EPT_DISABLED ||
+	    (l1tf_vmx_mitigation == VMENTER_L1D_FLUSH_NEVER &&
+	     sched_smt_active())) {
+		return sprintf(buf, "%s; VMX: %s\n", L1TF_DEFAULT_MSG,
+			       l1tf_vmx_states[l1tf_vmx_mitigation]);
+	}
+
+	return sprintf(buf, "%s; VMX: %s, SMT %s\n", L1TF_DEFAULT_MSG,
+		       l1tf_vmx_states[l1tf_vmx_mitigation],
+		       sched_smt_active() ? "vulnerable" : "disabled");
+}
 
 static ssize_t itlb_multihit_show_state(char *buf)
 {
