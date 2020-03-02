@@ -334,28 +334,37 @@ bool cpu_wait_death(unsigned int cpu, int seconds);
 bool cpu_report_death(void);
 #endif /* #ifdef CONFIG_HOTPLUG_CPU */
 
+enum cpuhp_smt_control {
+	CPU_SMT_ENABLED,
+	CPU_SMT_DISABLED,
+	CPU_SMT_FORCE_DISABLED,
+	CPU_SMT_NOT_SUPPORTED,
+};
+
+#if defined(CONFIG_SMP) && defined(CONFIG_HOTPLUG_SMT)
+extern enum cpuhp_smt_control cpu_smt_control;
+extern void cpu_smt_disable(bool force);
+extern void cpu_smt_check_topology_early(void);
+extern void cpu_smt_check_topology(void);
+extern int cpuhp_smt_enable(void);
+extern int cpuhp_smt_disable(enum cpuhp_smt_control ctrlval);
+#else
+# define cpu_smt_control		(CPU_SMT_ENABLED)
+static inline void cpu_smt_disable(bool force) { }
+static inline void cpu_smt_check_topology_early(void) { }
+static inline void cpu_smt_check_topology(void) { }
+static inline int cpuhp_smt_enable(void) { return 0; }
+static inline int cpuhp_smt_disable(enum cpuhp_smt_control ctrlval) { return 0; }
+#endif
+
+extern bool cpu_mitigations_off(void);
+extern bool cpu_mitigations_auto_nosmt(void);
+
 #define IDLE_START 1
 #define IDLE_END 2
 
 void idle_notifier_register(struct notifier_block *n);
 void idle_notifier_unregister(struct notifier_block *n);
 void idle_notifier_call_chain(unsigned long val);
-
-/*
- * These are used for a global "mitigations=" cmdline option for toggling
- * optional CPU mitigations.
- */
-enum cpu_mitigations {
-	CPU_MITIGATIONS_OFF,
-	CPU_MITIGATIONS_AUTO,
-};
-
-extern enum cpu_mitigations cpu_mitigations;
-
-/* mitigations=off */
-static inline bool cpu_mitigations_off(void)
-{
-	return cpu_mitigations == CPU_MITIGATIONS_OFF;
-}
 
 #endif /* _LINUX_CPU_H_ */
