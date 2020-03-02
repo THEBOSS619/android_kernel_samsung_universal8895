@@ -76,9 +76,10 @@ int usb_gadget_map_request(struct usb_gadget *gadget,
 		}
 
 		req->num_mapped_sgs = mapped;
-	} else {
+	} else if (req->dma_mapped) {
 		req->dma = dma_map_single(dev, req->buf, req->length,
 				is_in ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
+		req->dma_mapped = 0;
 
 		if (dma_mapping_error(dev, req->dma)) {
 			dev_err(dev, "failed to map buffer\n");
