@@ -14,7 +14,7 @@
 
 #include "cpu.h"
 
-enum tsx_ctrl_states tsx_ctrl_state = TSX_CTRL_NOT_SUPPORTED;
+enum tsx_ctrl_states tsx_ctrl_state __ro_after_init = TSX_CTRL_NOT_SUPPORTED;
 
 void tsx_disable(void)
 {
