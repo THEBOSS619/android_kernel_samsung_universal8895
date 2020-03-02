@@ -588,7 +588,7 @@ static int __init ve_spc_clk_init(void)
 		if (init_opp_table[cluster])
 			continue;
 
-		if (ve_init_opp_table(cpu_dev))			if (ve_init_opp_table(cpu_dev))
+		if (ve_init_opp_table(cpu_dev))
 			pr_warn("failed to initialise cpu%d opp table\n", cpu);
 		else if (dev_pm_opp_set_sharing_cpus(cpu_dev,
 			 topology_core_cpumask(cpu_dev->id)))
