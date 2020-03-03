@@ -595,5 +595,9 @@ static int __init ve_spc_clk_init(void)
 			pr_warn("failed to mark OPPs shared for cpu%d\n", cpu);
 		else
 			init_opp_table[cluster] = true;
+	}
+
+	platform_device_register_simple("vexpress-spc-cpufreq", -1, NULL, 0);
+	return 0;
 }
 device_initcall(ve_spc_clk_init);
