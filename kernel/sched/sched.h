@@ -691,7 +691,6 @@ struct rq {
 #endif
 	#define CPU_LOAD_IDX_MAX 5
 	unsigned long cpu_load[CPU_LOAD_IDX_MAX];
-	unsigned int nr_pinned_tasks;
 	unsigned int misfit_task;
 #ifdef CONFIG_NO_HZ_COMMON
 #ifdef CONFIG_SMP
@@ -1360,8 +1359,6 @@ extern const int rtprio_to_weight[51];
 #endif
 #define ENQUEUE_WAKEUP_NEW	0x40
 
-#define DEQUEUE_IDLE		0x80 /* The last dequeue before IDLE */
-
 #define RETRY_TASK		((void *)-1UL)
 
 struct sched_class {
@@ -1518,7 +1515,6 @@ extern void resched_cpu(int cpu);
 
 extern struct rt_bandwidth def_rt_bandwidth;
 extern void init_rt_bandwidth(struct rt_bandwidth *rt_b, u64 period, u64 runtime);
-extern void init_rt_schedtune_timer(struct sched_rt_entity *rt_se);
 
 extern struct dl_bandwidth def_dl_bandwidth;
 extern void init_dl_bandwidth(struct dl_bandwidth *dl_b, u64 period, u64 runtime);

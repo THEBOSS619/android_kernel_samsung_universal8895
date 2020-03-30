@@ -273,6 +273,11 @@
 		energy-data {
 			A53_ENERGY: a53-energy {
 				capacity-mips = <230>;
+				power-coefficient = <160>;
+			};
+			M2_ENERGY: m2-energy {
+				capacity-mips = <663>;
+				power-coefficient = <760>;
 				power-coefficient = <465>;
 			};
 			M2_ENERGY: m2-energy {
@@ -287,7 +292,11 @@
 				/* little cores */
 				coregroup0 {
 					lower-boundary = <0>;
+
+					upper-boundary = <42>;
+
 					upper-boundary = <25>;
+
 					coverage-ratio = <100>;
 				};
 				/* big cores */
@@ -296,6 +305,24 @@
 					upper-boundary = <100>;
 					coverage-ratio = <75>;
 				};
+
+			};
+
+			/* Load Balance Trigger */
+			#define DEFAULT_RATIO	80
+			lbt {
+				overutil-level0 {
+					cpus =	"0-3",
+						"4-7";
+					ratio =	<30>,
+						<40>;
+				};
+				overutil-level1 {
+					cpus =	"0-7";
+					ratio =	<DEFAULT_RATIO>;
+				};
+			};
+
 			};
 
 			/* Load Balance Trigger */
@@ -604,6 +631,7 @@
 			pm_qos-min-class = <5>;
 			pm_qos-max-class = <6>;
 			pm_qos-jigbooting = <1469000>;
+			pm_qos-booting = <2002000>;
 
 			/* auto calibration value */
 			auto-cal-freq = <1703000>;
@@ -620,8 +648,8 @@
 						  2574000 1794000
 						  2496000 1794000
 						  2314000 1794000
-						  2158000 1540000
-						  2002000 1540000
+						  2158000 1794000
+						  2002000 1794000
 						  1937000 1352000
 						  1807000 1352000
 						  1703000 1014000
@@ -849,12 +877,12 @@
 		gpu_dvfs_table = <  839000    98  100   1  1794000  1690000     0
 		                    764000    98  100   1  1794000  1690000     0
 		                    683000    98  100   1  1794000  1690000     0
-		                    572000    78   99   1  1794000  1690000     2002000
-		                    546000    78   99   1  1794000  1690000     2002000
-		                    455000    78   85   1  1540000  1456000     2002000
-		                    385000    78   85   1  1352000  1248000     0
-		                    338000    78   85   1  1014000   949000     0
-		                    260000    78   85   1   421000        0     0 >;
+		                    572000    78   99   1  1794000        0     1937000
+		                    546000    78   99   1  1794000        0     1937000
+		                    455000    78   85   1  1540000        0     1937000
+		                    385000    78   85   1  1352000        0     2002000
+		                    338000    78   85   1  1014000        0     2002000
+		                    260000    78   85   1   421000        0     2002000 >;
 		gpu_sustainable_info = <0 0 0 0 0>; /* Not used */
 		gpu_pmqos_cpu_cluster_num = <2>;
 		gpu_pmu_status_reg_offset = <0x40E4>;
@@ -4687,12 +4715,12 @@
 				};
 				mngs_alert0: mngs-alert0 {
 					temperature = <55000>; /* millicelsius */
-					hysteresis = <1000>; /* millicelsius */
+					hysteresis = <2000>; /* millicelsius */
 					type = "active";
 				};
 				mngs_alert1: mngs-alert1 {
-					temperature = <69000>; /* millicelsius */
-					hysteresis = <1000>; /* millicelsius */
+					temperature = <83000>; /* millicelsius */
+					hysteresis = <5000>; /* millicelsius */
 					type = "passive";
 				};
 				mngs_hot: mngs-hot {
@@ -4727,33 +4755,33 @@
 					type = "active";
 				};
 				apo_alert1: apo-alert1 {
-					temperature = <72000>; /* millicelsius */
-					hysteresis = <3000>; /* millicelsius */
+					temperature = <76000>; /* millicelsius */
+					hysteresis = <5000>; /* millicelsius */
 					type = "active";
 				};
 				apo_alert2: apo-alert2 {
-					temperature = <75000>; /* millicelsius */
-					hysteresis = <3000>; /* millicelsius */
+					temperature = <81000>; /* millicelsius */
+					hysteresis = <5000>; /* millicelsius */
 					type = "active";
 				};
 				apo_alert3: apo-alert3 {
-					temperature = <78000>; /* millicelsius */
-					hysteresis = <3000>; /* millicelsius */
+					temperature = <86000>; /* millicelsius */
+					hysteresis = <5000>; /* millicelsius */
 					type = "active";
 				};
 				apo_alert4: apo-alert4 {
-					temperature = <81000>; /* millicelsius */
-					hysteresis = <3000>; /* millicelsius */
+					temperature = <91000>; /* millicelsius */
+					hysteresis = <5000>; /* millicelsius */
 					type = "active";
 				};
 				apo_alert5: apo-alert5 {
-					temperature = <84000>; /* millicelsius */
-					hysteresis = <3000>; /* millicelsius */
+					temperature = <96000>; /* millicelsius */
+					hysteresis = <5000>; /* millicelsius */
 					type = "active";
 				};
 				apo_alert6: apo-alert6 {
-					temperature = <87000>; /* millicelsius */
-					hysteresis = <3000>; /* millicelsius */
+					temperature = <101000>; /* millicelsius */
+					hysteresis = <5000>; /* millicelsius */
 					type = "active";
 				};
 				apo_hot: apo-hot {
@@ -4827,13 +4855,13 @@
 					type = "active";
 				};
 				gpu_alert0: gpu-alert0 {
-					temperature = <72000>; /* millicelsius */
+					temperature = <78000>; /* millicelsius */
 					hysteresis = <2000>; /* millicelsius */
 					type = "active";
 				};
 				gpu_alert1: gpu-alert1 {
-					temperature = <76000>; /* millicelsius */
-					hysteresis = <2000>; /* millicelsius */
+					temperature = <88000>; /* millicelsius */
+					hysteresis = <5000>; /* millicelsius */
 					type = "passive";
 				};
 				gpu_hot: gpu-hot {
@@ -5139,7 +5167,7 @@
 				ctrl-type = <PM_QOS_MIN_LIMIT>;
 				execution-mode = <AARCH64_MODE>;
 					/* big	    lit */
-				table = < 2314000 1690000
+				table = < 2314000 1053000
 					2158000 715000
 					2002000 715000
 					1937000 715000
@@ -5162,15 +5190,15 @@
 					2158000 1690000
 					2002000 1690000
 					1937000 1690000
-					1807000 1690000
-					1703000 1690000
-					1469000 1690000
-					1261000 1690000
-					1170000 1690000
-					1066000 1690000
-					 962000 1690000
-					 858000 1690000
-					 741000 1690000 >;
+					1807000 1053000
+					1703000 1053000
+					1469000 1053000
+					1261000 1053000
+					1170000 1053000
+					1066000 1053000
+					 962000 1053000
+					 858000 1053000
+					 741000 1053000 >;
 			};
 
 		};

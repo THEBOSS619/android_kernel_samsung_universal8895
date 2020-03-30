@@ -579,6 +579,7 @@ config ASUS_NB_WMI
 config EEEPC_WMI
 	tristate "Eee PC WMI Driver"
 	depends on ASUS_WMI
+	depends on SERIO_I8042 || SERIO_I8042 = n
 	---help---
 	  This is a driver for newer Eee PC laptops. It adds extra features
 	  like wireless radio and bluetooth control, leds, hotkeys, backlight...

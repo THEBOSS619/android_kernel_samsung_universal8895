@@ -26,6 +26,12 @@ SCHED_FEAT(NEXT_BUDDY, false)
 SCHED_FEAT(LAST_BUDDY, true)
 
 /*
+ * skip buddy i.e task called yield() is always skipped and the
+ * next entity is selected to run irrespective of the vruntime
+ */
+SCHED_FEAT(STRICT_SKIP_BUDDY, true)
+
+/*
  * Consider buddies to be cache hot, decreases the likelyness of a
  * cache buddy being migrated away, increases cache locality.
  */
@@ -34,7 +40,7 @@ SCHED_FEAT(CACHE_HOT_BUDDY, true)
 /*
  * Allow wakeup-time preemption of the current task:
  */
-SCHED_FEAT(WAKEUP_PREEMPTION, true)
+SCHED_FEAT(WAKEUP_PREEMPTION, false)
 
 SCHED_FEAT(HRTICK, false)
 SCHED_FEAT(DOUBLE_TICK, false)
@@ -72,7 +78,7 @@ SCHED_FEAT(RT_PUSH_IPI, true)
 
 SCHED_FEAT(FORCE_SD_OVERLAP, false)
 SCHED_FEAT(RT_RUNTIME_SHARE, true)
-SCHED_FEAT(LB_MIN, false)
+SCHED_FEAT(LB_MIN, true)
 SCHED_FEAT(ATTACH_AGE_LOAD, true)
 
 SCHED_FEAT(WA_IDLE, true)

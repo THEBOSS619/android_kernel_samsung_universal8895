@@ -21,9 +21,17 @@ chmod 0644 ./lib64/libsecure_storage.so;
 print "Setting fimc binaries permissions...";
 find ./vendor/firmware -name '*.bin' -exec chmod 0644 {} \;
 
-print "Copying patched files into data";
-cp -rf ${tmp}/rz_system /data/rz_system;
-chmod 0755 /data/rz_system;
+print "Copying patched files into system path";
+cp -rf ${tmp}/rz_system /system/rz_system;
+chmod 0755 /system/rz_system;
+
+# Remove RMM lock (credits: @corsicanu)
+print "Removing RMM lock... (credits: corsicanu@XDA)";
+sed -i 's/vaultkeeper\.feature\=1/vaultkeeper\.feature\=0/' /system/build.prop;
+rm -f /system/lib/libvk*;
+rm -f /system/lib64/libvk*;
+rm -rf /system/priv-app/Rlc;
+rm -rf /system/priv-app/KnoxGuard;
 
 # Remove RMM lock (credits: @corsicanu)
 print "Removing RMM lock... (credits: corsicanu@XDA)";

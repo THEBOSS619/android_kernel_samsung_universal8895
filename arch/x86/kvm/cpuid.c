@@ -373,7 +373,7 @@ static inline int __do_cpuid_ent(struct kvm_cpuid_entry2 *entry, u32 function,
 
 	r = -E2BIG;
 
-	if (*nent >= maxnent)
+	if (WARN_ON(*nent >= maxnent))
 		goto out;
 
 	do_cpuid_1_ent(entry, function, index);
@@ -441,18 +441,36 @@ static inline int __do_cpuid_ent(struct kvm_cpuid_entry2 *entry, u32 function,
 		entry->flags |= KVM_CPUID_FLAG_SIGNIFCANT_INDEX;
 		/* Mask ebx against host capability word 9 */
 		if (index == 0) {
-			entry->ebx &= kvm_supported_word9_x86_features;
-			cpuid_mask(&entry->ebx, 9);
+			entry->ebx &= kvm_cpuid_7_0_ebx_x86_features;
+			cpuid_mask(&entry->ebx, CPUID_7_0_EBX);
 			// TSC_ADJUST is emulated
 			entry->ebx |= F(TSC_ADJUST);
+			entry->ecx &= kvm_cpuid_7_0_ecx_x86_features;
+			cpuid_mask(&entry->ecx, CPUID_7_ECX);
+			/* PKU is not yet implemented for shadow paging. */
+			if (!tdp_enabled || !boot_cpu_has(X86_FEATURE_OSPKE))
+				entry->ecx &= ~F(PKU);
+
 			entry->edx &= kvm_cpuid_7_0_edx_x86_features;
 			cpuid_mask(&entry->edx, CPUID_7_EDX);
+			if (boot_cpu_has(X86_FEATURE_IBPB) &&
+			    boot_cpu_has(X86_FEATURE_IBRS))
+				entry->edx |= F(SPEC_CTRL);
+			if (boot_cpu_has(X86_FEATURE_STIBP))
+				entry->edx |= F(INTEL_STIBP);
+			if (boot_cpu_has(X86_FEATURE_SSBD))
+				entry->edx |= F(SPEC_CTRL_SSBD);
+			/*
+			 * We emulate ARCH_CAPABILITIES in software even
+			 * if the host doesn't support it.
+			 */
+			entry->edx |= F(ARCH_CAPABILITIES);
 		} else {
 			entry->ebx = 0;
+			entry->ecx = 0;
 			entry->edx = 0;
 		}
 		entry->eax = 0;
-		entry->ecx = 0;
 		break;
 	}
 	case 9:
@@ -657,6 +675,9 @@ out:
 static int do_cpuid_ent(struct kvm_cpuid_entry2 *entry, u32 func,
 			u32 idx, int *nent, int maxnent, unsigned int type)
 {
+	if (*nent >= maxnent)
+		return -E2BIG;
+
 	if (type == KVM_GET_EMULATED_CPUID)
 		return __do_cpuid_ent_emulated(entry, func, idx, nent, maxnent);
 

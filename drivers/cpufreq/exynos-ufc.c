@@ -18,6 +18,10 @@
 #include <linux/cpufreq.h>
 #include <linux/pm_opp.h>
 
+#if defined(CONFIG_SCHED_EMS)
+#include <linux/ems_service.h>
+#endif
+
 #include <soc/samsung/exynos-cpu_hotplug.h>
 
 #include "exynos-acme.h"
@@ -35,7 +39,6 @@ struct pm_qos_request cpu_online_max_qos_req;
 
 static int last_max_limit = -1;
 static int sse_mode;
-static int dvfs_disable = 0;
 
 static ssize_t show_cpufreq_table(struct kobject *kobj,
 				struct kobj_attribute *attr, char *buf)
@@ -101,18 +104,20 @@ static ssize_t show_cpufreq_min_limit(struct kobject *kobj,
 		first_domain()->min_freq >> (scale * SCALE_SIZE));
 }
 
-#ifdef CONFIG_SCHED_HMP
+#ifdef CONFIG_SCHED_EMS
 static bool boosted;
 #endif
 
 static inline void control_boost(bool enable)
 {
-#ifdef CONFIG_SCHED_HMP
+#ifdef CONFIG_SCHED_EMS
 	if (boosted && !enable) {
-		set_hmp_boost(HMP_BOOSTING_DISABLE);
+		request_kernel_prefer_perf(STUNE_TOPAPP, 0);
+		request_kernel_prefer_perf(STUNE_FOREGROUND, 0);
 		boosted = false;
 	} else if (!boosted && enable) {
-		set_hmp_boost(HMP_BOOSTING_ENABLE);
+		request_kernel_prefer_perf(STUNE_TOPAPP, 1);
+		request_kernel_prefer_perf(STUNE_FOREGROUND, 1);
 		boosted = true;
 	}
 #endif
@@ -132,9 +137,6 @@ static ssize_t store_cpufreq_min_limit(struct kobject *kobj,
 	int index = 0;
 	int ret = 0;
 	struct cpumask mask;
-
-	if (dvfs_disable)
-		return count;
 
 	if (sscanf(buf, "%8d", &input) < 1)
 		return -EINVAL;
@@ -247,9 +249,6 @@ static ssize_t store_cpufreq_min_limit_wo_boost(struct kobject *kobj,
 	int index = 0;
 	int ret = 0;
 	struct cpumask mask;
-
-	if (dvfs_disable)
-		return count;
 
 	if (sscanf(buf, "%8d", &input) < 1)
 		return -EINVAL;
@@ -513,9 +512,6 @@ static ssize_t store_cpufreq_max_limit(struct kobject *kobj, struct kobj_attribu
 {
 	int input;
 
-	if (dvfs_disable)
-		return count;
-
 	if (sscanf(buf, "%8d", &input) < 1)
 		return -EINVAL;
 
@@ -551,36 +547,6 @@ static ssize_t store_execution_mode_change(struct kobject *kobj, struct kobj_att
 	return count;
 }
 
-static ssize_t show_dvfs_disable(struct kobject *kobj,
-				struct kobj_attribute *attr, char *buf)
-{
-	return snprintf(buf, 10, "%d\n", dvfs_disable);
-}
-
-static ssize_t store_dvfs_disable(struct kobject *kobj, struct kobj_attribute *attr,
-					const char *buf, size_t count)
-{
-	struct list_head *domains = get_domain_list();
-	struct exynos_cpufreq_domain *domain;
-	int input;
-
-	if (sscanf(buf, "%8d", &input) < 1)
-		return -EINVAL;
-
-	if (input > 0) {
-		list_for_each_entry_reverse(domain, domains, list) {
-			enable_domain_cpus(domain);
-			pm_qos_update_request(&domain->user_max_qos_req,
-						domain->max_freq);
-			pm_qos_update_request(&domain->user_min_qos_req, 0);
-			pm_qos_update_request(&domain->user_min_qos_wo_boost_req, 0);
-		}
-	}
-	dvfs_disable = input;
-
-	return count;
-}
-
 static struct kobj_attribute cpufreq_table =
 __ATTR(cpufreq_table, 0444, show_cpufreq_table, NULL);
 static struct kobj_attribute cpufreq_min_limit =
@@ -595,9 +561,6 @@ __ATTR(cpufreq_max_limit, 0644,
 static struct kobj_attribute execution_mode_change =
 __ATTR(execution_mode_change, 0644,
 		show_execution_mode_change, store_execution_mode_change);
-static struct kobj_attribute disable_dvfs =
-__ATTR(disable_dvfs, 0644,
-		show_dvfs_disable, store_dvfs_disable);
 
 static __init void init_sysfs(void)
 {
@@ -615,9 +578,6 @@ static __init void init_sysfs(void)
 
 	if (sysfs_create_file(power_kobj, &execution_mode_change.attr))
 		pr_err("failed to create cpufreq_max_limit node\n");
-
-	if (sysfs_create_file(power_kobj, &disable_dvfs.attr))
-		pr_err("failed to create disable_dvfs node\n");
 }
 
 static int parse_ufc_ctrl_info(struct exynos_cpufreq_domain *domain,

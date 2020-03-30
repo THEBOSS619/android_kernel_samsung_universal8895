@@ -46,6 +46,7 @@ struct usb_ep;
  *     by adding a zero length packet as needed;
  * @short_not_ok: When reading data, makes short packets be
  *     treated as errors (queue stops advancing till cleanup).
+ * @dma_mapped: Indicates if request has been mapped to DMA (internal)
  * @complete: Function called when request completes, so this request and
  *	its buffer may be re-used.  The function will always be called with
  *	interrupts disabled, and it must not sleep.
@@ -101,6 +102,7 @@ struct usb_request {
 	unsigned		no_interrupt:1;
 	unsigned		zero:1;
 	unsigned		short_not_ok:1;
+	unsigned		dma_mapped:1;
 
 	void			(*complete)(struct usb_ep *ep,
 					struct usb_request *req);
@@ -269,6 +271,16 @@ static inline int usb_ep_enable(struct usb_ep *ep)
 
 	if (ep->enabled)
 		return 0;
+
+	/* UDC drivers can't handle endpoints with maxpacket size 0 */
+	if (usb_endpoint_maxp(ep->desc) == 0) {
+		/*
+		 * We should log an error message here, but we can't call
+		 * dev_err() because there's no way to find the gadget
+		 * given only ep.
+		 */
+		return -EINVAL;
+	}
 
 	ret = ep->ops->enable(ep, ep->desc);
 	if (ret)
